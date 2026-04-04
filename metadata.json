@@ -1,0 +1,5 @@
+{
+  "name": "Lettuce Disease Detection System",
+  "description": "Interactive visualization and analysis system for YOLO-based lettuce disease detection.",
+  "requestFramePermissions": []
+}

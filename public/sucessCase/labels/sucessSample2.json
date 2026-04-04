@@ -1,0 +1,20 @@
+{
+  "image": "sucessSample2.webp",
+  "image_width": 1280,
+  "image_height": 960,
+  "model_name": "lettuce_yolo_640",
+  "input_size": 640,
+  "detections": [
+    {
+      "class_id": 0,
+      "class_name": "lettuce_sclerotinia_rot",
+      "confidence": 0.35,
+      "bbox": {
+        "x_min": 500,
+        "y_min": 400,
+        "x_max": 650,
+        "y_max": 550
+      }
+    }
+  ]
+}

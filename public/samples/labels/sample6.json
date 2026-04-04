@@ -1,0 +1,8 @@
+{
+  "image": "Sample6.webp",
+  "image_width": 210,
+  "image_height": 140,
+  "model_name": "lettuce_yolo_640",
+  "input_size": 640,
+  "detections": []
+}
