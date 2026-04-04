@@ -95,7 +95,7 @@ export default function AnalysisPage() {
           </div>
           <div className="flex flex-col justify-center">
             <p className="text-gray-500 italic">
-              "Efficiency in AI is not just about the highest resolution, but the optimal balance between performance and resource consumption."
+              "가장 좋은 AI는 적절한 타협을 통해 최고의 효율을 보여주는 AI 입니다."
             </p>
           </div>
         </div>
@@ -176,18 +176,18 @@ export default function AnalysisPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="space-y-3">
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold">1</div>
-            <h4 className="font-bold">Scale Sensitivity</h4>
-            <p className="text-sm text-gray-400">Significant weakness observed in detecting lesions smaller than 1% of total image area.</p>
+            <h4 className="font-bold">CONF Threshold 조정</h4>
+            <p className="text-sm text-gray-400">CONF Threshold의 조정을 통해 질병의 탐지가 어느 수준까지 가능한 지 확인합니다.</p>
           </div>
           <div className="space-y-3">
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold">2</div>
-            <h4 className="font-bold">Pattern Recognition</h4>
-            <p className="text-sm text-gray-400">High sensitivity to background textures that mimic the irregular shapes of disease lesions.</p>
+            <h4 className="font-bold">Negative 데이터 강화</h4>
+            <p className="text-sm text-gray-400">질병이 있는 것처럼 보이지만 정상인 데이터를 추가하여 모델이 배경과 질병을 구분할 수 있도록 합니다.</p>
           </div>
           <div className="space-y-3">
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold">3</div>
-            <h4 className="font-bold">Boundary Stability</h4>
-            <p className="text-sm text-gray-400">Bounding boxes tend to fluctuate in ambiguous regions where disease boundaries are not sharp.</p>
+            <h4 className="font-bold">경계 안정성</h4>
+            <p className="text-sm text-gray-400">질병의 경계가 불분명한 경우 모델이 질병을 탐지하지 못하는 경우가 발생합니다. 이를 해결하기 위해 질병의 경계 데이터를 추가합니다.</p>
           </div>
         </div>
       </section>
