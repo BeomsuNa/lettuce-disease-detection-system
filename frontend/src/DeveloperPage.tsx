@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   Terminal,
   Upload,
@@ -41,6 +41,8 @@ export default function DeveloperPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [confThreshold, setConfThreshold] = useState(0.2);
+  const limitConf = 0.2
+
 
   // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,7 +282,7 @@ export default function DeveloperPage() {
                     {analysisResult && (
                       <div className="absolute inset-0 pointer-events-none">
                         {analysisResult.detections
-                          .filter(det => det.confidence >= 0.2 && det.confidence >= confThreshold)
+                          .filter(det => det.confidence > 0.2 && confThreshold >= limitConf)
                           .map((det, i) => {
                             const top = (det.bbox.y1 / analysisResult.image_height) * 100;
                             const left = (det.bbox.x1 / analysisResult.image_width) * 100;
@@ -288,7 +290,7 @@ export default function DeveloperPage() {
                             const height = ((det.bbox.y2 - det.bbox.y1) / analysisResult.image_height) * 100;
 
                             // 등급 및 색상 결정
-                            const confPercent = det.confidence * 100;
+                            const confPercent = confThreshold * 100;
                             let grade = "낮음";
                             let colorClass = "bg-rose-500";
                             let borderClass = "border-rose-500";
@@ -382,7 +384,7 @@ export default function DeveloperPage() {
                         </span>
                       </div>
 
-                      <div className="relative group/slider">
+                      <div className="relative">
                         <input
                           type="range"
                           min="0"
@@ -402,8 +404,6 @@ export default function DeveloperPage() {
                             filter: !analysisResult || analysisResult.detections.length === 0 ? "grayscale(1)" : "none"
                           }}
                         />
-                        {/* Custom Slider Thumb Design (mimicking shadcn + dynamic color) */}
-
                       </div>
 
                       <div className="mt-4 space-y-1.5">
@@ -419,10 +419,8 @@ export default function DeveloperPage() {
                                 <span className="text-gray-900 font-bold">{analysisResult.detections.filter(d => d.confidence >= 0.2).length}개 탐지</span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs">현재 임계값({(confThreshold * 100).toFixed(0)}%) 적용</span>
-                                <span className="text-indigo-600 font-bold">
-                                  {analysisResult.detections.filter(d => d.confidence >= 0.2 && d.confidence >= confThreshold).length}개 표시 중
-                                </span>
+
+
                               </div>
                             </div>
                           )}
@@ -473,7 +471,7 @@ export default function DeveloperPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {analysisResult.detections
-                    .filter(det => det.confidence >= 0.2 && det.confidence >= confThreshold)
+                    .filter(det => det.confidence >= 0.2 && confThreshold >= limitConf)
                     .map((det, i) => {
                       const confPercent = det.confidence * 100;
                       let grade = "낮음";
@@ -523,6 +521,12 @@ export default function DeveloperPage() {
                         </div>
                       );
                     })}
+
+                  {analysisResult.detections.filter(d => d.confidence >= 0.2 && d.confidence >= confThreshold).length === 0 && analysisResult.detections.length > 0 && (
+                    <div className="col-span-full py-12 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                      <p className="text-gray-400 font-medium">현재 임계값({(confThreshold * 100).toFixed(0)}%) 이상인 객체가 없습니다.</p>
+                    </div>
+                  )}
 
                   {analysisResult.detections.length === 0 && (
                     <div className="col-span-full py-12 text-center">
