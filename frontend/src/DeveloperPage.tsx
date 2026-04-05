@@ -11,7 +11,8 @@ import {
   Cpu,
   Loader2,
   X,
-  Plus
+  Plus,
+  SlidersHorizontal
 } from 'lucide-react';
 import { cn } from './lib/utils';
 
@@ -39,6 +40,7 @@ export default function DeveloperPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [confThreshold, setConfThreshold] = useState(0.2);
 
   // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +57,7 @@ export default function DeveloperPage() {
     if (!selectedFile) return;
     setIsAnalyzing(true);
     setAnalysisResult(null);
-    
+
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -69,6 +71,7 @@ export default function DeveloperPage() {
         throw new Error(`Analysis failed: ${response.statusText}`);
       }
 
+      await new Promise(resolve => setTimeout(resolve, 2000));
       const data: AnalysisResult = await response.json();
       setAnalysisResult(data);
     } catch (error) {
@@ -252,7 +255,7 @@ export default function DeveloperPage() {
                       Drop an image or select a file to run real-time inference and visualize bounding boxes.
                     </p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     className="px-8 py-4 bg-black text-white rounded-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10"
                   >
@@ -264,52 +267,74 @@ export default function DeveloperPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                 <div className="relative group rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center min-h-[400px]">
+
                   {/* Image and BBox Container */}
                   <div className="relative inline-block max-w-full">
-                    <img 
-                      src={previewUrl} 
-                      alt="Preview" 
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
                       className="max-w-full max-h-[600px] object-contain rounded-lg"
                     />
-                    
+
                     {/* BBox Overlay */}
                     {analysisResult && (
                       <div className="absolute inset-0 pointer-events-none">
-                        {analysisResult.detections.map((det, i) => {
-                          const top = (det.bbox.y1 / analysisResult.image_height) * 100;
-                          const left = (det.bbox.x1 / analysisResult.image_width) * 100;
-                          const width = ((det.bbox.x2 - det.bbox.x1) / analysisResult.image_width) * 100;
-                          const height = ((det.bbox.y2 - det.bbox.y1) / analysisResult.image_height) * 100;
+                        {analysisResult.detections
+                          .filter(det => det.confidence >= 0.2 && det.confidence >= confThreshold)
+                          .map((det, i) => {
+                            const top = (det.bbox.y1 / analysisResult.image_height) * 100;
+                            const left = (det.bbox.x1 / analysisResult.image_width) * 100;
+                            const width = ((det.bbox.x2 - det.bbox.x1) / analysisResult.image_width) * 100;
+                            const height = ((det.bbox.y2 - det.bbox.y1) / analysisResult.image_height) * 100;
 
-                          return (
-                            <div 
-                              key={i}
-                              className="absolute border-2 border-indigo-500 bg-indigo-500/10 transition-all duration-300"
-                              style={{
-                                top: `${top}%`,
-                                left: `${left}%`,
-                                width: `${width}%`,
-                                height: `${height}%`,
-                              }}
-                            >
-                              <div className="absolute -top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold rounded shadow-sm whitespace-nowrap">
-                                <span className="uppercase">{det.class_name}</span>
-                                <span className="opacity-75">{(det.confidence * 100).toFixed(0)}%</span>
+                            // 등급 및 색상 결정
+                            const confPercent = det.confidence * 100;
+                            let grade = "낮음";
+                            let colorClass = "bg-rose-500";
+                            let borderClass = "border-rose-500";
+                            let bgColorClass = "bg-rose-500/10";
+
+                            if (confPercent >= 50) {
+                              grade = "높음";
+                              colorClass = "bg-emerald-500";
+                              borderClass = "border-emerald-500";
+                              bgColorClass = "bg-emerald-500/10";
+                            } else if (confPercent >= 30) {
+                              grade = "중간";
+                              colorClass = "bg-amber-500";
+                              borderClass = "border-amber-500";
+                              bgColorClass = "bg-amber-500/10";
+                            }
+
+                            return (
+                              <div
+                                key={i}
+                                className={cn("absolute border-2 transition-all duration-300", borderClass, bgColorClass)}
+                                style={{
+                                  top: `${top}%`,
+                                  left: `${left}%`,
+                                  width: `${width}%`,
+                                  height: `${height}%`,
+                                }}
+                              >
+                                <div className={cn("absolute -top-6 left-0 flex items-center gap-1.5 px-2 py-0.5 text-white text-[10px] font-bold rounded shadow-sm whitespace-nowrap bg-indigo-600")}>
+                                  <span className="uppercase">{det.class_name}</span>
+                                  <span className="px-1 bg-white/20 rounded">{(confThreshold * 100).toFixed(0)}%</span>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
                       </div>
                     )}
                   </div>
-                  <button 
+                  <button
                     onClick={resetUpload}
                     className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black text-white rounded-full backdrop-blur-md transition-all opacity-0 group-hover:opacity-100"
                   >
                     <X size={18} />
                   </button>
                 </div>
-                
+
                 <div className="flex flex-col justify-between py-4">
                   <div className="space-y-6">
                     <div>
@@ -325,7 +350,7 @@ export default function DeveloperPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <h4 className="text-sm font-bold text-gray-900">Analysis Options</h4>
                       <div className="space-y-2">
@@ -339,10 +364,74 @@ export default function DeveloperPage() {
                         ))}
                       </div>
                     </div>
+
+                    {/* Confidence Slider - Sidebar Control */}
+                    <div className={cn(
+                      "p-5 rounded-2xl border transition-all duration-300",
+                      (analysisResult && analysisResult.detections.length > 0)
+                        ? "bg-white border-indigo-100 shadow-sm ring-1 ring-indigo-50"
+                        : "bg-gray-50 border-gray-100 opacity-60"
+                    )}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 text-indigo-600 font-bold">
+                          <SlidersHorizontal size={14} />
+                          <span className="text-xs uppercase tracking-wider">Confidence Filter</span>
+                        </div>
+                        <span className="text-xl font-black font-mono text-indigo-600">
+                          {(confThreshold * 100).toFixed(0)}%
+                        </span>
+                      </div>
+
+                      <div className="relative group/slider">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                          disabled={!analysisResult || analysisResult.detections.length === 0}
+                          value={confThreshold}
+                          onChange={(e) => setConfThreshold(parseFloat(e.target.value))}
+                          className={cn(
+                            "w-full h-1.5 rounded-full appearance-none transition-all cursor-pointer",
+                            !analysisResult || analysisResult.detections.length === 0
+                              ? "bg-gray-200"
+                              : "bg-gray-100 ring-1 ring-inset ring-gray-100"
+                          )}
+                          style={{
+                            // 커스텀 스타일을 통해 Thumb 색상을 동적으로 조절 (Tailwind 변수 활용)
+                            filter: !analysisResult || analysisResult.detections.length === 0 ? "grayscale(1)" : "none"
+                          }}
+                        />
+                        {/* Custom Slider Thumb Design (mimicking shadcn + dynamic color) */}
+
+                      </div>
+
+                      <div className="mt-4 space-y-1.5">
+                        <div className="text-[10px] text-gray-500 font-medium leading-tight">
+                          {!analysisResult ? (
+                            "분석을 진행하면 필터링이 가능합니다."
+                          ) : analysisResult.detections.length === 0 ? (
+                            "결과가 없어 필터를 사용할 수 없습니다."
+                          ) : (
+                            <div className="flex flex-col gap-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-400 text-xs text-rose-500 font-bold">20% 미만 데이터 제외됨</span>
+                                <span className="text-gray-900 font-bold">{analysisResult.detections.filter(d => d.confidence >= 0.2).length}개 탐지</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-400 text-xs">현재 임계값({(confThreshold * 100).toFixed(0)}%) 적용</span>
+                                <span className="text-indigo-600 font-bold">
+                                  {analysisResult.detections.filter(d => d.confidence >= 0.2 && d.confidence >= confThreshold).length}개 표시 중
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  
                   <div className="pt-8 space-y-3">
-                    <button 
+                    <button
                       onClick={startAnalysis}
                       disabled={isAnalyzing}
                       className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] disabled:opacity-50"
@@ -354,7 +443,7 @@ export default function DeveloperPage() {
                       )}
                       {isAnalyzing ? "Analyzing..." : "Start Neural Analysis"}
                     </button>
-                    <button 
+                    <button
                       onClick={resetUpload}
                       disabled={isAnalyzing}
                       className="w-full py-4 bg-white border border-gray-200 text-gray-700 rounded-2xl font-bold hover:bg-gray-50 transition-all disabled:opacity-50"
@@ -365,48 +454,76 @@ export default function DeveloperPage() {
                 </div>
               </div>
             )}
-            
+
             {/* Analysis Results Display */}
             {analysisResult && (
               <div className="mt-8 bg-white border border-gray-100 rounded-3xl p-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">Analysis Result</h3>
-                    <p className="text-sm text-gray-500 font-medium">Model successfully identified {analysisResult.detections.length} regions.</p>
+                    <p className="text-sm text-gray-500 font-medium mt-1">
+                      신뢰도 20% 이상 객체 중, 임계값 <span className="text-indigo-600 font-bold">{(confThreshold * 100).toFixed(0)}%</span> 이상의 영역만 표시 중입니다.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
+                  <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold transition-all border border-emerald-100">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     COMPLETED
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {analysisResult.detections.map((det, i) => (
-                    <div key={i} className="bg-gray-50 border border-gray-100 rounded-2xl p-5 hover:border-indigo-100 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded leading-none">OBJECT {String(i + 1).padStart(2, '0')}</span>
-                        <span className="text-xs font-bold text-indigo-600">{(det.confidence * 100).toFixed(1)}%</span>
-                      </div>
-                      <h4 className="font-bold text-gray-900 mb-2">{det.class_name}</h4>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-mono text-gray-400">
-                          <span>X-Range</span>
-                          <span>{det.bbox.x1} - {det.bbox.x2}</span>
+                  {analysisResult.detections
+                    .filter(det => det.confidence >= 0.2 && det.confidence >= confThreshold)
+                    .map((det, i) => {
+                      const confPercent = det.confidence * 100;
+                      let grade = "낮음";
+                      let badgeClass = "bg-rose-50 text-rose-700 border-rose-100";
+                      let barClass = "bg-rose-500";
+                      let accentColor = "text-rose-600";
+
+                      if (confPercent >= 50) {
+                        grade = "높음";
+                        badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                        barClass = "bg-emerald-500";
+                        accentColor = "text-emerald-600";
+                      } else if (confPercent >= 30) {
+                        grade = "중간";
+                        badgeClass = "bg-amber-50 text-amber-700 border-amber-100";
+                        barClass = "bg-amber-500";
+                        accentColor = "text-amber-600";
+                      }
+
+                      return (
+                        <div key={i} className="bg-gray-50 border border-gray-100 rounded-2xl p-5 hover:border-indigo-100 transition-colors">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] font-black bg-gray-900 text-white px-2 py-0.5 rounded leading-none">OBJECT {String(i + 1).padStart(2, '0')}</span>
+                            <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", badgeClass)}>{grade}</span>
+                          </div>
+                          <h4 className="font-bold text-gray-900 mb-2">{det.class_name}</h4>
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-bold text-gray-400">Confidence</span>
+                              <span className={cn("text-xs font-bold", accentColor)}>{confPercent.toFixed(1)}%</span>
+                            </div>
+                            <div className="flex justify-between text-[10px] font-mono text-gray-400">
+                              <span>X-Range</span>
+                              <span>{det.bbox.x1} - {det.bbox.x2}</span>
+                            </div>
+                            <div className="flex justify-between text-[10px] font-mono text-gray-400">
+                              <span>Y-Range</span>
+                              <span>{det.bbox.y1} - {det.bbox.y2}</span>
+                            </div>
+                          </div>
+                          <div className="mt-4 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={cn("h-full transition-all duration-1000", barClass)}
+                              style={{ width: `${confPercent}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="flex justify-between text-[10px] font-mono text-gray-400">
-                          <span>Y-Range</span>
-                          <span>{det.bbox.y1} - {det.bbox.y2}</span>
-                        </div>
-                      </div>
-                      <div className="mt-4 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-indigo-500 transition-all duration-1000" 
-                          style={{ width: `${det.confidence * 100}%` }} 
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  
+                      );
+                    })}
+
                   {analysisResult.detections.length === 0 && (
                     <div className="col-span-full py-12 text-center">
                       <p className="text-gray-400 font-medium italic">No objects detected in this image.</p>
