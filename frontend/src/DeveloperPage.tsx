@@ -30,6 +30,7 @@ interface Detection {
 interface AnalysisResult {
   image_width: number;
   image_height: number;
+  inference_time_ms: number;
   detections: Detection[];
 }
 
@@ -40,6 +41,7 @@ export default function DeveloperPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [lastInferenceTime, setLastInferenceTime] = useState<number | null>(null);
   const [confThreshold, setConfThreshold] = useState(0.2);
   const limitConf = 0.2
 
@@ -76,6 +78,7 @@ export default function DeveloperPage() {
       await new Promise(resolve => setTimeout(resolve, 2000));
       const data: AnalysisResult = await response.json();
       setAnalysisResult(data);
+      setLastInferenceTime(data.inference_time_ms);
     } catch (error) {
       console.error("Analysis Error:", error);
       alert("이미지 분석 중 오류가 발생했습니다. 백엔드 서버 상태를 확인해주세요.");
@@ -161,8 +164,8 @@ export default function DeveloperPage() {
                     <p className="text-xl font-mono">12%</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                    <p className="text-white/60 text-xs font-bold uppercase mb-1">Latency</p>
-                    <p className="text-xl font-mono">42ms</p>
+                    <p className="text-white/60 text-xs font-bold uppercase mb-1">Inference</p>
+                    <p className="text-xl font-mono">{lastInferenceTime ? `${lastInferenceTime}ms` : '--'}</p>
                   </div>
                 </div>
               </div>
@@ -463,9 +466,15 @@ export default function DeveloperPage() {
                       신뢰도 20% 이상 객체 중, 임계값 <span className="text-indigo-600 font-bold">{(confThreshold * 100).toFixed(0)}%</span> 이상의 영역만 표시 중입니다.
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold transition-all border border-emerald-100">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    COMPLETED
+                  <div className="flex items-center gap-3">
+                    <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold border border-indigo-100 flex items-center gap-1.5">
+                      <Cpu size={12} />
+                      {analysisResult.inference_time_ms} ms
+                    </div>
+                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold transition-all border border-emerald-100">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      COMPLETED
+                    </div>
                   </div>
                 </div>
 

@@ -1,4 +1,5 @@
 from io import BytesIO
+import time
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from PIL import Image, UnidentifiedImageError
@@ -51,7 +52,11 @@ async def predict(file: UploadFile = File(...)):
     image_width, image_height = image.size
 
     try:
+        start_time = time.perf_counter()
         results = model.predict(image, verbose=False)
+        end_time = time.perf_counter()
+        inference_time_ms = round((end_time - start_time) * 1000, 2)
+        
         result = results[0]
     except Exception as e:
         raise HTTPException(
@@ -83,5 +88,6 @@ async def predict(file: UploadFile = File(...)):
     return {
         "image_width": image_width,
         "image_height": image_height,
+        "inference_time_ms": inference_time_ms,
         "detections": detections
     }
