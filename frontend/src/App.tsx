@@ -104,11 +104,18 @@ export default function App() {
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Lettuce Disease Detection Visualization System
             </span>
+            <button
+              onClick={() => setCurrentPage('developer')}
+              className="mt-2 text-left text-gray-50 hover:text-indigo-600 transition-colors w-fit"
+            >
+              입장
+            </button>
           </div>
           <div className="flex flex-col text-[10px] text-gray-400 tracking-widest font-medium">
             <span>GIHTUB</span>
             <span>E-mail : skqjatn6788@gmail.com</span>
             <span>Phone : 010-5923-6988</span>
+
           </div>
         </div>
       </footer>
