@@ -3,14 +3,22 @@ import gsap from 'gsap';
 import HomePage from './HomePage';
 import AnalysisPage from './AnalysisPage';
 import ArchitecturePage from './ArchitecturePage';
+import DeveloperPage from './DeveloperPage';
 import { cn } from './lib/utils';
 import { Binary, Github } from 'lucide-react';
 
-type Page = 'home' | 'analysis' | 'architecture';
+type Page = 'home' | 'analysis' | 'architecture' | 'developer';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Secret route detection
+    if (window.location.pathname === '/DevPage') {
+      setCurrentPage('developer');
+    }
+  }, []);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -27,6 +35,7 @@ export default function App() {
       case 'home': return <HomePage />;
       case 'analysis': return <AnalysisPage />;
       case 'architecture': return <ArchitecturePage />;
+      case 'developer': return <DeveloperPage />;
       default: return <HomePage />;
     }
   };
