@@ -79,6 +79,7 @@ export default function DeveloperPage() {
       const data: AnalysisResult = await response.json();
       setAnalysisResult(data);
       setLastInferenceTime(data.inference_time_ms);
+      setConfThreshold(data.detections.map(detection => detection.confidence))
     } catch (error) {
       console.error("Analysis Error:", error);
       alert("이미지 분석 중 오류가 발생했습니다. 백엔드 서버 상태를 확인해주세요.");
