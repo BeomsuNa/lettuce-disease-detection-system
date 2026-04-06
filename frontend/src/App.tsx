@@ -49,8 +49,8 @@ export default function App() {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setCurrentPage('home')}
           >
-            <div className="w-8 h-8 bg-black rounded flex items-center justify-center">
-              <Binary size={18} className="text-white" />
+            <div className="w-8 h-8  rounded flex items-center justify-center overflow-hidden">
+              <img src="/favicorn.png" alt="project logo" className="w-full h-full object-cover scale-110" />
             </div>
             <span className="font-bold tracking-tight text-sm hidden sm:block">LETTUCE.AI</span>
           </div>
