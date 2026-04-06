@@ -1,4 +1,3 @@
-import React from 'react';
 import { Server, Cpu, Layout, ArrowRight, Database, PlayCircle } from 'lucide-react';
 
 export default function ArchitecturePage() {
@@ -119,19 +118,16 @@ export default function ArchitecturePage() {
               <PlayCircle size={20} className="text-accent" />
               Demo Video
             </h3>
-            <div className="aspect-video bg-black rounded-xl flex items-center justify-center group cursor-pointer relative overflow-hidden">
-              <img 
-                src="https://picsum.photos/seed/demo/800/450?blur=5" 
-                alt="Demo video placeholder" 
-                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700"
-                referrerPolicy="no-referrer"
-              />
-              <div className="relative z-10 flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <PlayCircle size={32} className="text-white" />
-                </div>
-                <span className="text-white text-xs font-bold uppercase tracking-widest">Watch System Demo</span>
-              </div>
+            <div className="aspect-video bg-black rounded-xl relative overflow-hidden shadow-2xl ring-1 ring-gray-100 group">
+              <video
+                className="w-full h-full object-cover"
+                controls
+                playsInline
+                preload="metadata"
+              >
+                <source src="/demoVideo/DemoVideo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
             <p className="text-[10px] text-gray-400 mt-3 text-center">
               Demonstrates FastAPI inference, /predict endpoint request, and real-time UI rendering.

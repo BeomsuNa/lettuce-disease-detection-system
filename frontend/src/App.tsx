@@ -78,7 +78,7 @@ export default function App() {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/BeomsuNa?tab=repositories"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 hover:bg-gray-50 rounded-full transition-colors"
